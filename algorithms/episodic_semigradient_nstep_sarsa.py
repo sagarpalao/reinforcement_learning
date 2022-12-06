@@ -26,7 +26,7 @@ class ValueFunctionNeuralNetwork(nn.Module):
 # Episodic Semigradient N Step SARSA
 class EpisodicSemigradientNStepSarsa():
 
-    def __init__(self, no_of_states, hidden_units, no_of_actions, alpha_value, N, epsilon):
+    def __init__(self, no_of_states, hidden_units, no_of_actions, alpha_value, N, epsilon, decay=False, beta=0):
         # Create neural network to represent action-value function
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.q_hat = ValueFunctionNeuralNetwork(no_of_states + no_of_actions, hidden_units).to(self.device)
@@ -35,6 +35,8 @@ class EpisodicSemigradientNStepSarsa():
         self.no_of_actions = no_of_actions
         self.N = N
         self.epsilon = epsilon
+        self.decay = decay
+        self.beta = beta
 
 
     def get_action(self, s, epsilon):
@@ -153,6 +155,10 @@ class EpisodicSemigradientNStepSarsa():
                     self.actionval_optimizer.step()
 
                 t = t + 1
+
+            
+            if self.decay and iterations%10==0:
+                self.epsilon = self.epsilon * self.beta
 
             if (iterations + 1) % 100 == 0 or iterations == 0:
                 print(self.compute_return(trajectory, gamma, 0))

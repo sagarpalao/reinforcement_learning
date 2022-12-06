@@ -112,20 +112,20 @@ if __name__ == "__main__":
     # print()
 
     # Environment - Acrobot
-    processes = []
-    for alpha_policy in [1e-3]: #[1e-4, 1e-3]:
-        for alpha_value in [1e-3]: #[1e-4, 1e-3]:
-            for hidden_units in [10]:
-                env = gym.make('Acrobot-v1')
-                filename = f"Figures/reinforce_acrobot_{str(alpha_policy).replace('.', '#')}_{str(alpha_value).replace('.', '#')}_{hidden_units}"
-                p = Process(target=learn_and_plot, args=('Acrobot-v1', 'reinforce', [env.observation_space.shape[0], [hidden_units], env.action_space.n, alpha_policy, alpha_value], filename, 1))
-                processes.append(p)
-                p.start()
-                p.join()
-    # for p in processes:
-    #     p.join()
-    print()
-    print()
+    # processes = []
+    # for alpha_policy in [1e-3]: #[1e-4, 1e-3]:
+    #     for alpha_value in [1e-3]: #[1e-4, 1e-3]:
+    #         for hidden_units in [10]:
+    #             env = gym.make('Acrobot-v1')
+    #             filename = f"Figures/reinforce_acrobot_{str(alpha_policy).replace('.', '#')}_{str(alpha_value).replace('.', '#')}_{hidden_units}"
+    #             p = Process(target=learn_and_plot, args=('Acrobot-v1', 'reinforce', [env.observation_space.shape[0], [hidden_units], env.action_space.n, alpha_policy, alpha_value], filename, 1))
+    #             processes.append(p)
+    #             p.start()
+    #             p.join()
+    # # for p in processes:
+    # #     p.join()
+    # print()
+    # print()
 
 
     # # Algorithm 2 - Actor Critic
@@ -202,9 +202,24 @@ if __name__ == "__main__":
     #                 p = Process(target=learn_and_plot, args=('gridworld', 'sarsa', [10, [hidden_units], 4, alpha_value, N, epsilon], filename, 0.9))
     #                 processes.append(p)
     #                 p.start()
+    #                 p.join()
     # for p in processes:
     #     p.join()
     # print()
+
+    processes = []
+    for N in [5, 10]:
+        for alpha_value in [1e-3, 1e-2]:
+            for hidden_units in [10]:
+                for beta in [0.9, 0.95, 0.97]:
+                    filename = f"Figures/sarsa_gridworld_{str(alpha_value).replace('.', '#')}_{N}_{hidden_units}_{str(1).replace('.', '#')}_{str(beta).replace('.', '#')}"
+                    p = Process(target=learn_and_plot, args=('gridworld', 'sarsa', [10, [hidden_units], 4, alpha_value, N, 1, True, beta], filename, 0.9))
+                    processes.append(p)
+                    p.start()
+                    p.join()
+    for p in processes:
+        p.join()
+    print()
 
     # # Environment - Acrobot
     # processes = []
@@ -221,3 +236,20 @@ if __name__ == "__main__":
     #     p.join()
     # print()
     # print()
+
+    # processes = []
+    # for N in [5, 10]:
+    #     for alpha_value in [1e-3, 1e-2]:
+    #         for hidden_units in [10]:
+    #             for beta in [0.9, 0.95, 0.97]:
+    #                 env = gym.make('Acrobot-v1')
+    #                 filename = f"Figures/sarsa_acrobot_{str(alpha_value).replace('.', '#')}_{N}_{hidden_units}_{str(1).replace('.', '#')}_{str(beta).replace('.', '#')}"
+    #                 p = Process(target=learn_and_plot, args=('Acrobot-v1', 'sarsa', [env.observation_space.shape[0], [hidden_units], env.action_space.n, alpha_value, N, 1, True, beta], filename, 1))
+    #                 processes.append(p)
+    #                 p.start()
+    # for p in processes:
+    #     p.join()
+    # print()
+    # print()
+
+
