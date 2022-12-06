@@ -1,2 +1,5 @@
-# reinforcement_learning
-This is a repo for class project of Reinforcement Learning
+!pip install gym==0.26.2
+
+brew install swig
+pip install box2d-py
+pip install "gym[all]"

@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# My stuffs
+run*
+test*
+archive/*
+Figures/*
+.DS_Store
