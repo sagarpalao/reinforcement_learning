@@ -202,7 +202,6 @@ if __name__ == "__main__":
     #                 p = Process(target=learn_and_plot, args=('gridworld', 'sarsa', [10, [hidden_units], 4, alpha_value, N, epsilon], filename, 0.9))
     #                 processes.append(p)
     #                 p.start()
-    #                 p.join()
     # for p in processes:
     #     p.join()
     # print()
@@ -216,7 +215,6 @@ if __name__ == "__main__":
                     p = Process(target=learn_and_plot, args=('gridworld', 'sarsa', [10, [hidden_units], 4, alpha_value, N, 1, True, beta], filename, 0.9))
                     processes.append(p)
                     p.start()
-                    p.join()
     for p in processes:
         p.join()
     print()
