@@ -158,7 +158,6 @@ class ReinforceWithBaseline():
 
             # For debugging print
             if (iterations + 1) % 100 == 0 or iterations == 0:
-                #print(steps)
                 print(self.compute_return(trajectory, gamma, 0))
 
             # Return after episode i, synonym to no of steps needed to reach goal after episode i
