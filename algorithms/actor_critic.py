@@ -3,16 +3,31 @@ import torch.nn as nn
 from torch import optim
 import numpy as np
 
+# A custom layer to enable exploration using Boltzmann distribution
+class ExplorationLayer(nn.Module):
+
+    def __init__(self, exploration):
+        super().__init__()
+        self.exploration = exploration
+
+    def forward(self, x):
+        # Multiply exploration constant to x
+        # exploration -> 0, more and more stochastic action selection
+        # exploration -> inf, more and more deterministic action selection
+        return self.exploration * x
+
+
 # Multilayer Neural Network with ReLU activation to represent Policy
 class PolicyNeuralNetwork(nn.Module):
 
-    def __init__(self, no_of_states, hidden_units, no_of_actions):
+    def __init__(self, no_of_states, hidden_units, no_of_actions, exploration):
         super(PolicyNeuralNetwork, self).__init__()
         layers = []
         for i, k in enumerate(hidden_units):
             layers.append(nn.Linear(no_of_states if i == 0 else hidden_units[i - 1], k))
             layers.append(nn.ReLU())
         layers.append(nn.Linear(hidden_units[-1], no_of_actions))
+        layers.append(ExplorationLayer(exploration))
         layers.append(nn.Softmax(dim=1))
         self.sequence_linear_relu = nn.Sequential(*layers)
 
@@ -41,10 +56,10 @@ class ValueFunctionNeuralNetwork(nn.Module):
 # Actro Critic Method
 class ActorCritic():
 
-    def __init__(self, no_of_states, hidden_units, no_of_actions, alpha_policy, alpha_value):
+    def __init__(self, no_of_states, hidden_units, no_of_actions, alpha_policy, alpha_value, exploration=1):
         # Create neural network to represent policy and state-value function
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.policy = PolicyNeuralNetwork(no_of_states, hidden_units, no_of_actions).to(self.device)
+        self.policy = PolicyNeuralNetwork(no_of_states, hidden_units, no_of_actions, exploration).to(self.device)
         self.v_hat = ValueFunctionNeuralNetwork(no_of_states, hidden_units).to(self.device)
         # Construct optimizers to optimize weights of the neural network to represent policy and state-value function
         self.policy_optimizer = optim.Adam(self.policy.parameters(), lr=alpha_policy)
