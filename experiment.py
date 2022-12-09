@@ -12,7 +12,7 @@ from environment.gridworld import GridWorld687
 from multiprocessing import Process
 
 # Setting Random Seed for reproducability of results
-SEED = 687
+SEED = 42
 torch.manual_seed(SEED)
 random.seed(SEED)
 np.random.seed(SEED)
@@ -26,7 +26,7 @@ def learn_and_plot(envname, algoname, args, filename, gamma):
     episodes_return_curves = []
     action_episodescompleted_curves = []
 
-    for i in range(20):
+    for i in range(1):
         
         if envname == 'gridworld':
             env = GridWorld687()
@@ -83,20 +83,6 @@ if __name__ == "__main__":
 
     # # Algorithm 1 - REINFORCE with Baseline
 
-    # Environment - Experimental
-    # processes = []
-    # for alpha_policy in [1e-3]:
-    #     for alpha_value in [1e-3]:
-    #         for hidden_units in [10]:
-    #             env = gym.make('LunarLander-v2')
-    #             filename = f"Figures/reinforce_lunarlander_{str(alpha_policy).replace('.', '#')}_{str(alpha_value).replace('.', '#')}_{hidden_units}"
-    #             p = Process(target=learn_and_plot, args=('LunarLander-v2', 'reinforce', [env.observation_space.shape[0], [hidden_units], env.action_space.n, alpha_policy, alpha_value], filename, 0.9))
-    #             processes.append(p)
-    #             p.start()
-    # for p in processes:
-    #     p.join()
-    # print()
-
     # Environment - 687 Gridworld
     processes = []
     for alpha_policy in [1e-3, 1e-4, 1e-2]:
@@ -128,20 +114,6 @@ if __name__ == "__main__":
 
 
     # # Algorithm 2 - Actor Critic
-
-    # # Environment - Experimental
-    # processes = []
-    # for alpha_policy in [1e-3]:
-    #     for alpha_value in [1e-3]:
-    #         for hidden_units in [10]:
-    #             env = gym.make('LunarLander-v2')
-    #             filename = f"Figures/ac_lunarlander_{str(alpha_policy).replace('.', '#')}_{str(alpha_value).replace('.', '#')}_{hidden_units}"
-    #             p = Process(target=learn_and_plot, args=('LunarLander-v2', 'ac', [env.observation_space.shape[0], [hidden_units], env.action_space.n, alpha_policy, alpha_value], filename, 0.9))
-    #             processes.append(p)
-    #             p.start()
-    # for p in processes:
-    #     p.join()
-    # print()
 
     # Environment - 687 Gridworld
     processes = []
@@ -176,36 +148,7 @@ if __name__ == "__main__":
 
     # # Algorithm 3 - Episodic Semigraident N Step SARSA
 
-    # # Environment - Lunar
-    # processes = []
-    # for N in [5]:
-    #     for alpha_value in [1e-3]:
-    #         for hidden_units in [10]:
-    #             for epsilon in [0.1]:
-    #                 env = gym.make('LunarLander-v2')
-    #                 filename = f"Figures/sarsa_lunar_{str(alpha_value).replace('.', '#')}_{N}_{hidden_units}_{str(epsilon).replace('.', '#')}"
-    #                 p = Process(target=learn_and_plot, args=('LunarLander-v2', 'sarsa', [env.observation_space.shape[0], [hidden_units], env.action_space.n, alpha_value, N, epsilon], filename, 0.9))
-    #                 processes.append(p)
-    #                 p.start()
-    # for p in processes:
-    #     p.join()
-    # print()
-
-    # processes = []
-    # for N in [5]:
-    #     for alpha_value in [1e-3]:
-    #         for hidden_units in [10]:
-    #             for beta in [0.9, 0.95]:
-    #                 env = gym.make('LunarLander-v2')
-    #                 filename = f"Figures/sarsa_lunar_{str(alpha_value).replace('.', '#')}_{N}_{hidden_units}_{str(epsilon).replace('.', '#')}_{str(beta).replace('.', '#')}_decay"
-    #                 p = Process(target=learn_and_plot, args=('LunarLander-v2', 'sarsa', [env.observation_space.shape[0], [hidden_units], env.action_space.n, alpha_value, N, 1, True, beta], filename, 0.9))
-    #                 processes.append(p)
-    #                 p.start()
-    # for p in processes:
-    #     p.join()
-    # print()
-
-    # # Environment - 687 Gridworld
+    # Environment - 687 Gridworld
     processes = []
     for N in [5, 10]:
         for alpha_value in [1e-3, 1e-2, 1e-4]:

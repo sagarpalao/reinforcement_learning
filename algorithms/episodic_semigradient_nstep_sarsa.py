@@ -4,6 +4,7 @@ from torch import optim
 
 import random
 import numpy as np
+from utils.adapt_lr import AdaptLearningRate
 
 
 # Multilayer Neural Network with ReLU activation to represent Action-Value Function
@@ -32,6 +33,9 @@ class EpisodicSemigradientNStepSarsa():
         self.q_hat = ValueFunctionNeuralNetwork(no_of_states + no_of_actions, hidden_units).to(self.device)
         # Construct optimizers to optimize weights of the neural network to represent action-value function
         self.actionval_optimizer = optim.Adam(self.q_hat.parameters(), lr=alpha_value)
+        self.q_hat_lr_adapter = AdaptLearningRate(lr=alpha_value, no_of_parameter_grps=len(list(self.q_hat.parameters())))
+        self.alpha_value = alpha_value
+
         self.no_of_actions = no_of_actions
         self.N = N
         self.epsilon = epsilon
@@ -147,19 +151,26 @@ class EpisodicSemigradientNStepSarsa():
                     # Since optimizer performs gradient descent and we want gradient ascent, we multiply it by -1 
                     loss = -1 * delta * q_val_rho
                     # Clear any graident in the weights of the neural network
-                    self.actionval_optimizer.zero_grad()
+                    # self.actionval_optimizer.zero_grad()
+                    for p in self.q_hat.parameters():
+                        p.grad = None
+
                     # Compute gradient of the gradient of the action value function * delta (which act as a constant)
-                    loss.backward()
+                    # loss.backward()
+                    gradients_q_hat_params = torch.autograd.grad(loss, self.q_hat.parameters())
+
                     # Perform gradient ascent step, i.e., 
                     # update weights with current adaptive learning rate * delta * graident in the weights of the neural network
-                    self.actionval_optimizer.step()
+                    # self.actionval_optimizer.step()
+                    self.q_hat_lr_adapter.update_param(self.q_hat.parameters(), gradients_q_hat_params)
 
                 t = t + 1
 
-            
+            # If decay, decay the exploration exponentially
             if self.decay and iterations%10==0:
                 self.epsilon = self.epsilon * self.beta
 
+            # To debug
             if (iterations + 1) % 100 == 0 or iterations == 0:
                 print(self.compute_return(trajectory, gamma, 0))
 

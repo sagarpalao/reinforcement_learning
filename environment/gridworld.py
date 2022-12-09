@@ -44,7 +44,7 @@ class GridWorld687():
         next_state_one_hot = np.zeros(10)
         next_state_one_hot[next_state[0]] = 1
         next_state_one_hot[5 + next_state[1]] = 1
-        return next_state_one_hot, reward, terminated, self.count > 1000, None
+        return next_state_one_hot, reward, terminated, self.count > 100, None
 
     def get_reward(self, s):
         if s in self.goal_state:

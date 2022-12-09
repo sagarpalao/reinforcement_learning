@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 import numpy as np
+from utils.adapt_lr import AdaptLearningRate
 
 # Multilayer Neural Network with ReLU activation to represent Policy
 class PolicyNeuralNetwork(nn.Module):
@@ -46,9 +47,10 @@ class ReinforceWithBaseline():
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.policy = PolicyNeuralNetwork(no_of_states, hidden_units, no_of_actions).to(self.device)
         self.v_hat = ValueFunctionNeuralNetwork(no_of_states, hidden_units).to(self.device)
-        # Construct optimizers to optimize weights of the neural network to represent policy and state-value function
-        self.policy_optimizer = optim.Adam(self.policy.parameters(), lr=alpha_policy)
-        self.stateval_optimizer = optim.Adam(self.v_hat.parameters(), lr=alpha_value)
+        self.policy_lr_adapter = AdaptLearningRate(lr=alpha_policy, no_of_parameter_grps=len(list(self.policy.parameters())))
+        self.v_hat_lr_adapter = AdaptLearningRate(lr=alpha_value, no_of_parameter_grps=len(list(self.v_hat.parameters())))
+        self.alpha_policy = alpha_policy
+        self.alpha_value = alpha_value
 
 
     def get_action(self, s):
@@ -129,13 +131,14 @@ class ReinforceWithBaseline():
                 # Since optimizer performs gradient descent and we want gradient ascent, we multiply it by -1 
                 val_loss = -1 * delta * state_val
                 # Clear any graident in the weights of the neural network
-                self.stateval_optimizer.zero_grad()
+                for p in self.v_hat.parameters():
+                    p.grad = None
                 # Compute gradient of the gradient of the state value function * delta (which act as a constant)
-                val_loss.backward()
+                gradients_v_hat_params = torch.autograd.grad(val_loss, self.v_hat.parameters())
                 # Perform gradient ascent step, i.e., 
                 # update weights with current adaptive learning rate * delta * graident in the weights of the neural network
-                self.stateval_optimizer.step()
-
+                self.v_hat_lr_adapter.update_param(self.v_hat.parameters(), gradients_v_hat_params)
+                
                 # To compute gradient of the action selected wrt to the wights of the policy network, 
                 # we pass the state to the policy network to get the action probabilities
                 x = torch.tensor(np.array([s]), dtype=torch.float32).to(self.device)
@@ -147,12 +150,13 @@ class ReinforceWithBaseline():
                 # Since optimizer performs gradient descent and we want gradient ascent, we multiply it by -1 
                 policy_loss = -1 * np.power(gamma, i) * delta * policy_loss
                 # Clear any graident in the weights of the neural network
-                self.policy_optimizer.zero_grad()
+                for p in self.policy.parameters():
+                    p.grad = None
                 # Compute gradient of the gradient of the policy network * delta (which act as a constant) * gamma^t (which act as a constant)
-                policy_loss.backward()
+                gradients_policy_params = torch.autograd.grad(policy_loss, self.policy.parameters())
                 # Perform gradient ascent step, i.e., 
                 # update weights with current adaptive learning rate * delta * gamma^t * graident in the weights of the neural network
-                self.policy_optimizer.step()
+                self.policy_lr_adapter.update_param(self.policy.parameters(), gradients_policy_params)
 
                 steps = steps + 1
 
