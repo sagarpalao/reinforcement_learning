@@ -1,1 +1,1 @@
-These have plots for gridworld with epsilon decay.
+This folder contains plots of Episodic Semi Gradient n-step Sarsa with Epsilon Decay on the 677-Gridworld environment.
