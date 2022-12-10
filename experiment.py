@@ -26,7 +26,7 @@ def learn_and_plot(envname, algoname, args, filename, gamma):
     episodes_return_curves = []
     action_episodescompleted_curves = []
 
-    for i in range(1):
+    for i in range(20):
         
         if envname == 'gridworld':
             env = GridWorld687()
@@ -46,10 +46,7 @@ def learn_and_plot(envname, algoname, args, filename, gamma):
         episodes_return_curves.append(episodes_return_curve)
         action_episodescompleted_curves.append(action_episodescompleted_curve)
 
-        if "gridworld" not in filename:
-            env.close()
-
-        print()
+        env.close()
 
     # Plot no of episode completed vs return from the initial state
     episodes_return_curve_mean = np.mean(np.array(episodes_return_curves), axis=0)
@@ -81,6 +78,7 @@ def learn_and_plot(envname, algoname, args, filename, gamma):
 
 if __name__ == "__main__": 
 
+
     # # Algorithm 1 - REINFORCE with Baseline
 
     # Environment - 687 Gridworld
@@ -97,10 +95,10 @@ if __name__ == "__main__":
         p.join()
     print()
 
-    # Environment - Acrobot
+    # # Environment - Acrobot
     processes = []
     for alpha_policy in [1e-3, 1e-4, 1e-2]:
-        for alpha_value in [1e-3, 1e-4, 1e-2]:
+        for alpha_value in [1e-2, 1e-3, 1e-4]:
             for hidden_units in [10, 32, 64]:
                 env = gym.make('Acrobot-v1')
                 filename = f"Figures/reinforce_acrobot_{str(alpha_policy).replace('.', '#')}_{str(alpha_value).replace('.', '#')}_{hidden_units}"
@@ -130,7 +128,7 @@ if __name__ == "__main__":
         p.join()
     print()
 
-    # Environment - Acrobot
+    # # Environment - Acrobot
     processes = []
     for alpha_policy in [1e-3, 1e-4, 1e-2]:
         for alpha_value in [1e-3, 1e-4, 1e-2]:
@@ -178,7 +176,7 @@ if __name__ == "__main__":
     # Environment - Acrobot
     processes = []
     for N in [5, 10]:
-        for alpha_value in [1e-3, 1e-2, 1e-4]:
+        for alpha_value in [1e-2, 1e-3, 1e-4]:
             for hidden_units in [10, 32, 64]:
                 for epsilon in [0.1, 0.05]:
                     env = gym.make('Acrobot-v1')
@@ -188,7 +186,6 @@ if __name__ == "__main__":
                     p.start()
     for p in processes:
         p.join()
-    print()
     print()
 
     processes = []

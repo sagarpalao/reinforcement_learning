@@ -132,5 +132,4 @@ dmypy.json
 run*
 test*
 archive/*
-Figures/*
 .DS_Store

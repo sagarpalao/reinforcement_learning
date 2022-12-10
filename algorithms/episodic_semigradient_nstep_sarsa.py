@@ -1,13 +1,12 @@
 import torch
 import torch.nn as nn
-from torch import optim
-
 import random
 import numpy as np
-from utils.adapt_lr import AdaptLearningRate
+from utils.param_update import ParameterUpdate
 
 
 # Multilayer Neural Network with ReLU activation to represent Action-Value Function
+# Action-value function of the state and action given a state and a action
 class ValueFunctionNeuralNetwork(nn.Module):
 
     def __init__(self, no_of_states_actions, hidden_units):
@@ -31,11 +30,8 @@ class EpisodicSemigradientNStepSarsa():
         # Create neural network to represent action-value function
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.q_hat = ValueFunctionNeuralNetwork(no_of_states + no_of_actions, hidden_units).to(self.device)
-        # Construct optimizers to optimize weights of the neural network to represent action-value function
-        self.actionval_optimizer = optim.Adam(self.q_hat.parameters(), lr=alpha_value)
-        self.q_hat_lr_adapter = AdaptLearningRate(lr=alpha_value, no_of_parameter_grps=len(list(self.q_hat.parameters())))
+        self.q_hat_param_update = ParameterUpdate(lr=alpha_value, no_of_parameter_grps=len(list(self.q_hat.parameters())))
         self.alpha_value = alpha_value
-
         self.no_of_actions = no_of_actions
         self.N = N
         self.epsilon = epsilon
@@ -45,8 +41,8 @@ class EpisodicSemigradientNStepSarsa():
 
     def get_action(self, s, epsilon):
         
-        # Pass the state through the action-value neural network, n timew with n different actions 
-        # and get their q-values
+        # Pass the state through the action-value neural network, |A| times with |A| different actions 
+        # and get q-values for each action of the state
         action_q_vals = []
         for a in range(self.no_of_actions):
             action_one_hot = np.zeros(self.no_of_actions)
@@ -148,25 +144,20 @@ class EpisodicSemigradientNStepSarsa():
                     delta = G - q_val_rho.detach().cpu().numpy().item()
 
                     # Compute the loss which is delta * gradient of the action value function
-                    # Since optimizer performs gradient descent and we want gradient ascent, we multiply it by -1 
+                    # Since we perform gradient descent and we want gradient ascent, we multiply it by -1 
                     loss = -1 * delta * q_val_rho
                     # Clear any graident in the weights of the neural network
-                    # self.actionval_optimizer.zero_grad()
                     for p in self.q_hat.parameters():
                         p.grad = None
-
                     # Compute gradient of the gradient of the action value function * delta (which act as a constant)
-                    # loss.backward()
                     gradients_q_hat_params = torch.autograd.grad(loss, self.q_hat.parameters())
-
                     # Perform gradient ascent step, i.e., 
                     # update weights with current adaptive learning rate * delta * graident in the weights of the neural network
-                    # self.actionval_optimizer.step()
-                    self.q_hat_lr_adapter.update_param(self.q_hat.parameters(), gradients_q_hat_params)
+                    self.q_hat_param_update.update_param(self.q_hat.parameters(), gradients_q_hat_params)
 
                 t = t + 1
 
-            # If decay, decay the exploration exponentially
+            # If decay, decay the exploration exponentially with beta after every 10 episode runs
             if self.decay and iterations%10==0:
                 self.epsilon = self.epsilon * self.beta
 
@@ -178,11 +169,3 @@ class EpisodicSemigradientNStepSarsa():
             episodes_return_curve.append(self.compute_return(trajectory, gamma, 0))
 
         return episodes_return_curve, action_episodescompleted_curve
-
-
-
-
-
-
-
-

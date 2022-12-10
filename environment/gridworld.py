@@ -59,3 +59,6 @@ class GridWorld687():
             return True
         else:
             return False
+
+    def close(self):
+        pass
